@@ -22,7 +22,7 @@ credits in `docs/`, and build / driver maintenance tools in `scripts/`.
 Before running, see [what the scripts do, permissions, checksums and removal](SECURITY.md).
 Project executables are currently unsigned; do not disable antivirus to run them.
 
-Download **ProCon2Bridge-0.3.2-windows-x64.zip** from [Releases](https://github.com/yngvifreyr1810/ProCon2Bridge/releases).
+Download **ProCon2Bridge-0.3.3-windows-x64.zip** from [Releases](https://github.com/yngvifreyr1810/ProCon2Bridge/releases).
 Extract to a writable folder and double-click **ProCon2Bridge-Start.cmd**. Python is not needed.
 First launch installs the bundled, signed USB/IP driver; accept Windows' administrator
 prompt and restart Windows if requested. Keep the bridge window open.
@@ -37,6 +37,14 @@ can preserve native motion access. No manual Bluetooth MAC configuration is need
 **ProCon2Bridge-Stop.cmd** disconnects cleanly. **ProCon2Bridge-Calibrate.cmd** restarts calibration: leave the
 controller flat and untouched for a few seconds. Keep `config.json` when upgrading;
 it contains your local calibration and is created automatically on first launch.
+
+## Start automatically with Windows
+
+The first time you start ProCon2Bridge, its launcher adds a per-user Windows
+startup entry for `ProCon2Bridge.exe`. It launches the bridge at sign-in and
+appears in **Task Manager > Startup apps** as **ProCon2Bridge**; disable it there
+whenever you prefer manual launch. No scheduled task or Windows service is used.
+Keep the extracted bridge folder in place so Windows can find the executable.
 
 ## Map the GL / GR back buttons
 

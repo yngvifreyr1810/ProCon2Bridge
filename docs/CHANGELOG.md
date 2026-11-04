@@ -1,3 +1,8 @@
+## 0.3.3
+
+* Add a per-user Windows Run entry on first launch.
+* Task Manager Startup apps can disable the ProCon2Bridge entry.
+
 ## 0.3.2
 
 * Prefix Windows entry-point and maintenance script names with ProCon2Bridge.

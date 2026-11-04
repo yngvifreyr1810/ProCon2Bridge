@@ -17,7 +17,7 @@ antivirus engines will approve every build or that software can be risk-free.
   26759 (stop), UDP 26760 (DSU motion) and UDP 26761 (detailed haptics).
   Do not expose these local services through port forwarding.
 * These launch/install scripts do not download or execute remote script text,
-  add startup tasks, disable antivirus, or add firewall exceptions. No telemetry
+  create scheduled tasks or services, disable antivirus, or add firewall exceptions. No telemetry
   or remote data upload is implemented in this bridge. Building from source
   separately downloads Python dependencies when you request pip install.
 * config.json, status.json and rotating bridge.log stay beside the program.
@@ -49,7 +49,10 @@ not change the system's saved execution policy. This flag is not a security endo
 Run ProCon2Bridge-Stop.cmd, close its windows, and delete the extracted package if no longer
 needed. If you also want to remove the separately installed USB/IP driver, use
 Windows Settings > Apps > Installed apps > USB/IP for Windows. Keep it if another
-USB/IP application still needs it. No autorun entry is installed by this project.
+USB/IP application still needs it. On first launch, the start script adds one
+value to the current user's Windows Run key for ProCon2Bridge.exe. It is visible
+in Task Manager > Startup apps and can be disabled there; no scheduled task or
+service is installed.
 
 ## Tiếng Việt
 
