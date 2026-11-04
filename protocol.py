@@ -15,6 +15,17 @@ BUTTONS = dict(Y=1, X=2, B=4, A=8, R=0x40, ZR=0x80, MINUS=0x100,
     PLUS=0x200, R_STICK=0x400, L_STICK=0x800, HOME=0x1000, CAPTURE=0x2000,
     C=0x4000, DOWN=0x10000, UP=0x20000, RIGHT=0x40000, LEFT=0x80000,
     L=0x400000, ZL=0x800000, GR=0x1000000, GL=0x2000000)
+OUTPUT_BUTTONS = tuple(k for k in BUTTONS if k not in ('GL','GR','C'))
+
+def mapping_targets(value):
+    """A legacy single target or a simultaneous chord, never a timed macro."""
+    targets = [value] if isinstance(value,str) else value
+    if not isinstance(targets,list) or not 1<=len(targets)<=4 or any(
+        not isinstance(t,str) or t not in (*OUTPUT_BUTTONS,'NONE') for t in targets):
+        raise ValueError('Choose NONE or up to four Switch Pro buttons')
+    if 'NONE' in targets and len(targets)!=1:
+        raise ValueError('NONE cannot be combined with another button')
+    return tuple(dict.fromkeys(t for t in targets if t!='NONE'))
 INIT = [(3,13,'0100ffffffffffff'),(7,1,''),(22,1,''),(21,3,'00'),
     (12,2,'94000000'),(17,3,''),(10,8,'01ffffffffffffffff3500460000000000000000'),
     (12,4,'94000000'),(3,10,'09000000'),(16,1,''),(1,12,''),(9,7,'0100000000000000')]
@@ -81,8 +92,8 @@ def remap_buttons(buttons, mappings):
         buttons &= ~BUTTONS[source]
     for source,target in mappings.items():
         mask = BUTTONS[source]
-        if original & mask and target != 'NONE':
-            buttons |= BUTTONS[target]
+        if original & mask:
+            for name in mapping_targets(target): buttons |= BUTTONS[name]
     return buttons
 
 def pack_stick(x,y):

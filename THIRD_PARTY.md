@@ -14,6 +14,12 @@ The separate USB/IP kernel driver is third-party software.
   `native_pro.py` subclasses the upstream server with a HID-only descriptor,
   64-byte USB reports, priority ACK handling, neutral virtual sensor calibration,
   and stale-motion suppression. The original vendor file remains unchanged.
+  Version 0.3.0 additionally adapts the GATT discovery fallback and throughput
+  request lifecycle from src/controller.py / src/windows_ble_parameters.py.
+  Bounded haptic I/O and fixed-cadence scheduling were informed by
+  src/system_bt_pair_rumble.py; the multi-Joy-Con coordinator is not copied.
+  The same pinned commit was rechecked against origin/main on 4 November 2026.
+  See UPSTREAM-REVIEW.md for the comparison and implementation boundaries.
 * pad2go, GPL-3.0:
   https://github.com/patrickdeangelis/pad2go
   pinned commit 6fa74a5603e2ca7fc4f0185615c39ba2ccb68a19.
@@ -44,8 +50,9 @@ The separate USB/IP kernel driver is third-party software.
   drivers/LICENSE-usbip-win2.txt. It is not part of this project's source.
   SHA256: 38cad6d4432b52d5bb9409d9ad03b72fdffc4ada4cd3a48fbeca1a2752a8518a.
 * Bleak and PyWinRT provide Windows Bluetooth access; Python and PyInstaller
-  provide the runtime and executable packaging. Corresponding dependency
-  licenses are included in `dependency-licenses/`.
+  provide the runtime and executable packaging; the settings window uses Python
+  Tkinter with Tcl/Tk. Corresponding dependency licenses, including Tcl/Tk license
+  terms, are included in `dependency-licenses/`.
 
 All ProCon2Bridge Python source is included next to the executable. Build with
 Python 3.14 on Windows, install `requirements.txt` in a virtual environment,

@@ -21,27 +21,14 @@ from protocol import (BUTTONS, WRITE, RESPONSE, INPUT, RUMBLE, INIT, SILENT,
 from dsu import DSU
 from native_pro import NativeProServer
 from hd_rumble import HDRumble, packet_frames
+from configuration import load_config,update_config
+from ble_connection import controller_connection,request_throughput,release_request
+from version import __version__
 
 ROOT = Path(sys.executable).parent if getattr(sys,'frozen',False) else Path(__file__).resolve().parent
 LOG = logging.getLogger('ProCon2Bridge')
 BUS = '8-32'
 USBIP = Path(os.environ.get('ProgramFiles',r'C:\Program Files'))/'USBip'/'usbip.exe'
-
-def load_config(path):
-    if not path.exists():
-        path.write_text((ROOT/'config.example.json').read_text(encoding='utf-8'),encoding='utf-8')
-    cfg = json.loads(path.read_text(encoding='utf-8-sig'))
-    if not 0 <= cfg['deadzone'] <= .4: raise ValueError('deadzone must be 0..0.4')
-    if not .1 <= cfg['gyro_scale'] <= 4: raise ValueError('gyro_scale must be 0.1..4')
-    if not 0 <= cfg['rumble_strength'] <= 1: raise ValueError('rumble_strength must be 0..1')
-    if len(cfg['gyro_bias']) != 3: raise ValueError('gyro_bias must have 3 values')
-    for source,target in cfg['button_mapping'].items():
-        if source not in BUTTONS or target not in {*BUTTONS,'NONE'}:
-            raise ValueError('unknown button mapping')
-    for key in ('dsu_port','usbip_port'):
-        if type(cfg[key]) is not int or not 1024 <= cfg[key] <= 65535:
-            raise ValueError(f'{key} must be 1024..65535')
-    return cfg
 
 async def run_usbip(*args):
     proc = await asyncio.create_subprocess_exec(str(USBIP),*args,
@@ -96,11 +83,16 @@ class Bridge:
         self.settled = False
         self.settle_until = 0
         self.throughput_request = None
+        self.ever_connected = False
+        self.config_stamp = None
+        self.background_tasks = set()
 
     def status(self):
-        data = dict(state=self.state,address=self.address,report_count=self.count,
+        data = dict(version=__version__,state=self.state,address=self.address,report_count=self.count,
             invalid_reports=self.invalid,seconds_since_input=round(time.monotonic()-self.last_input,3) if self.last_input else None,
             buttons=[k for k,v in BUTTONS.items() if self.raw_sample.buttons&v],
+            mapped_buttons=[k for k,v in BUTTONS.items() if self.sample.buttons&v and k not in ('GL','GR','C')],
+            button_mapping=self.cfg['button_mapping'],
             observed_buttons=[k for k,v in BUTTONS.items() if self.observed_buttons&v],
             accel_range=[self.accel_min,self.accel_max],gyro_range=[self.gyro_min,self.gyro_max],
             sample=dataclasses.asdict(self.raw_sample),virtual_output=bool(self.server),
@@ -128,11 +120,7 @@ class Bridge:
 
     async def initialize(self):
         try:
-            from winrt.windows.devices.bluetooth import BluetoothLEPreferredConnectionParameters
-            requester = self.client._backend._requester
-            self.throughput_request = requester.request_preferred_connection_parameters(
-                BluetoothLEPreferredConnectionParameters.throughput_optimized)
-            LOG.info('Bluetooth throughput preference: %s',self.throughput_request.status)
+            self.throughput_request = await request_throughput(self.client)
         except Exception as error:
             LOG.info('Bluetooth throughput preference unavailable: %s',error)
         await self.client.start_notify(RESPONSE,lambda _,d:self.response.put_nowait(bytes(d)))
@@ -162,7 +150,9 @@ class Bridge:
             await self.send(21,sub,data)
         self.settled = False
         self.settle_until = time.monotonic()+1
-        await self.client.start_notify(INPUT,self.input)
+        session=self.client
+        await session.start_notify(INPUT,lambda sender,data:self.input(sender,data)
+            if self.client is session and not self.disconnected.is_set() else None)
         LOG.info('Bluetooth initialized; sticks=%s',self.calibrations)
 
     def input(self,_,data):
@@ -189,7 +179,8 @@ class Bridge:
             if len(self.cal_samples)>=160:
                 self.cfg['gyro_bias'] = [sum(v[i] for v in self.cal_samples)/len(self.cal_samples) for i in range(3)]
                 self.cfg['gyro_calibrated'] = True
-                self.config_path.write_text(json.dumps(self.cfg,indent=2),encoding='utf-8')
+                task=asyncio.create_task(self.save_calibration())
+                self.background_tasks.add(task);task.add_done_callback(self.background_tasks.discard)
                 self.calibration_done = True
                 LOG.info('Saved still gyro bias: %s',self.cfg['gyro_bias'])
         self.sample = dataclasses.replace(sample,buttons=remap_buttons(sample.buttons,self.cfg['button_mapping']))
@@ -210,36 +201,74 @@ class Bridge:
         self.frames,self.rumble_at,self.rumble_pending = frames,time.monotonic(),True
 
     async def write_rumble(self,frames):
-        await self.client.write_gatt_char(RUMBLE,rumble_packet(self.sequence,*frames),response=False)
+        await self.write_packet(rumble_packet(self.sequence,*frames))
+
+    async def write_packet(self,packet):
+        await asyncio.wait_for(self.client.write_gatt_char(RUMBLE,packet,response=False),.25)
         self.sequence += 1
 
-    async def ticks(self):
-        last_status = 0
+    async def save_calibration(self):
+        try:
+            await asyncio.to_thread(update_config,self.config_path,
+                {'gyro_bias':self.cfg['gyro_bias'],'gyro_calibrated':True})
+        except Exception: LOG.exception('Could not save gyro calibration')
+
+    def release_controls(self):
+        self.sample=Sample();self.raw_sample=Sample();self.last_input=0
+        self.dsu.connected=False
+        if self.server: self.server.update_state(switch_report(Sample()))
+
+    def controller_disconnected(self,client):
+        if self.client is client:
+            self.state='reconnecting';self.release_controls();self.disconnected.set()
+
+    async def maintenance(self):
+        last_status=last_config=0
         while True:
-            await asyncio.sleep(.015)
+            await asyncio.sleep(.1)
+            now=time.monotonic()
+            if self.state=='connected' and self.last_input and now-self.last_input>2:
+                LOG.warning('Input timeout; releasing controls and reconnecting')
+                self.release_controls();self.disconnected.set()
+            if now-last_config>.5:
+                last_config=now
+                try:
+                    stamp=self.config_path.stat().st_mtime_ns
+                    if stamp!=self.config_stamp:
+                        self.config_stamp=stamp
+                        cfg=await asyncio.to_thread(load_config,self.config_path)
+                        if cfg['button_mapping']!=self.cfg['button_mapping']:
+                            self.cfg['button_mapping']=cfg['button_mapping']
+                            LOG.info('Applied updated button mappings')
+                except (OSError,ValueError): LOG.warning('Invalid config update; keeping active mappings',exc_info=True)
+            if now-last_status>1:
+                try: self.status()
+                except OSError: LOG.warning('Cannot update local status file',exc_info=True)
+                last_status=now
+
+    async def ticks(self):
+        deadline=time.monotonic()
+        while True:
+            deadline=max(deadline+.015,time.monotonic())
+            await asyncio.sleep(max(0,deadline-time.monotonic()))
             now = time.monotonic()
             if self.client and self.client.is_connected and self.state=='connected':
                 hd_active=self.hd.active()
                 if hd_active or self.hd_was_active:
                     try:
-                        await self.client.write_gatt_char(RUMBLE,packet_frames(self.sequence,self.hd.frames(now)),response=False)
-                        self.sequence+=1
+                        await self.write_packet(packet_frames(self.sequence,self.hd.frames(now)))
                     except Exception as error:
-                        LOG.warning('HD haptics write failed: %s',error);self.disconnected.set()
+                        LOG.warning('HD haptics write failed: %s',error);self.release_controls();self.disconnected.set()
                     self.frames=(SILENT,SILENT);self.rumble_pending=False
                 elif self.rumble_pending or self.frames!=(SILENT,SILENT):
                     if now-self.rumble_at>.2: self.frames = (SILENT,SILENT)
                     try: await self.write_rumble(self.frames)
                     except Exception as error:
                         LOG.warning('Haptics write failed: %s',error)
+                        self.release_controls()
                         self.disconnected.set()
                     self.rumble_pending = False
                 self.hd_was_active=hd_active
-                if self.last_input and now-self.last_input>2:
-                    LOG.warning('Input timeout; releasing controls and reconnecting')
-                    self.disconnected.set()
-            if now-last_status>1:
-                self.status(); last_status = now
 
     async def run(self):
         if not self.options.monitor:
@@ -255,6 +284,7 @@ class Bridge:
         hd_transport,_ = await self.loop.create_datagram_endpoint(lambda:self.hd,
             local_addr=('127.0.0.1',26761))
         ticker = asyncio.create_task(self.ticks())
+        maintainer = asyncio.create_task(self.maintenance())
         try:
             while True:
                 self.state = 'scanning'; self.status()
@@ -265,12 +295,13 @@ class Bridge:
                 self.address = device.address
                 self.state = 'connecting'; self.disconnected.clear(); self.status()
                 try:
-                    async with BleakClient(device,timeout=18,
-                        services=['ab7de9be-89fe-49ad-828f-118f09df7fd0'],
-                        disconnected_callback=lambda _:self.disconnected.set()) as client:
+                    async with controller_connection(device,BleakClient,
+                        self.controller_disconnected,
+                        cached=self.ever_connected) as client:
                         self.client = client
                         await asyncio.wait_for(self.initialize(),50)
                         self.state = 'connected'; self.last_input = time.monotonic(); self.status()
+                        self.ever_connected=True
                         LOG.info('Connected %s, native input + gyro ready',self.address)
                         if self.options.test_rumble:
                             LOG.info('Testing left then right actuator, 0.5s each')
@@ -290,13 +321,17 @@ class Bridge:
                 except Exception:
                     LOG.exception('Bluetooth connection failed; retrying')
                 finally:
+                    self.state='reconnecting'
+                    release_request(self.throughput_request);self.throughput_request=None
                     self.client = None; self.frames = (SILENT,SILENT)
-                    self.dsu.connected = False
-                    if self.server: self.server.update_state(switch_report(Sample()))
+                    self.rumble_pending=False;self.rumble_at=0;self.hd_was_active=False
+                    self.hd.reset()
+                    self.release_controls()
                 await asyncio.sleep(2)
         finally:
-            ticker.cancel()
+            ticker.cancel();maintainer.cancel()
             with contextlib.suppress(asyncio.CancelledError): await ticker
+            with contextlib.suppress(asyncio.CancelledError): await maintainer
             transport.close()
             hd_transport.close()
 
@@ -307,6 +342,7 @@ class Bridge:
             with contextlib.suppress(Exception): await detach_own_device(self.cfg['usbip_port'])
             self.server.stop()
         self.dsu.connected = False
+        if self.background_tasks: await asyncio.gather(*self.background_tasks,return_exceptions=True)
         self.state = 'stopped'; self.status()
 
 def math_norm(values): return sum(v*v for v in values)**.5
@@ -348,7 +384,13 @@ if __name__=='__main__':
     parser.add_argument('--duration',type=float,default=0,help='exit after this many seconds (0: keep running)')
     parser.add_argument('--stop',action='store_true',help='stop the running bridge cleanly')
     parser.add_argument('--verbose-usb',action='store_true',help='log USB initialization for diagnostics')
+    parser.add_argument('--settings',action='store_true',help='open GL/GR back-button mapping window')
+    parser.add_argument('--version',action='version',version=__version__)
     options = parser.parse_args()
+    if options.settings:
+        from settings_ui import open_settings
+        open_settings(ROOT)
+        sys.exit(0)
     if options.stop:
         try:
             with socket.create_connection(('127.0.0.1',26759),timeout=2) as control:

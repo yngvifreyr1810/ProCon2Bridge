@@ -4,6 +4,9 @@ __pycache__/
 *.zip
 *.spec
 config.json
+config.lock
+config-*.tmp
+.venv/
 status.*
 *.log
 *.log.*

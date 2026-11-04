@@ -1,5 +1,16 @@
 # Changes
 
+## 0.3.0
+
+* Native SETTINGS.cmd window for GL/GR: one button or a simultaneous chord,
+  immediate live reload, overlap-safe hold/release and preserved calibration.
+* Windows 11 BLE recovery: GATT validation, fresh discovery fallback, explicit
+  throughput-request cleanup, bounded haptic writes and fixed packet cadence.
+* Input watchdog independent of haptics; neutralize controls on disconnect,
+  reject stale-session callbacks/input and clear old effects across reconnects.
+* Record owner-confirmed emulator input, motion and rumble via Switch Pro 1;
+  document evidence limits and the review of Switch2Connect's existing source.
+
 ## 0.2.0
 
 * Direct Power Moon haptics: independent side/band amplitudes and frequencies,

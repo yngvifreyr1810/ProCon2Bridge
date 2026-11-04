@@ -23,6 +23,10 @@ antivirus engines will approve every build or that software can be risk-free.
 * config.json, status.json and rotating bridge.log stay beside the program.
   They may contain calibration, controller/adapter information and device addresses.
   Do not upload them without reviewing/redacting them. They are excluded from releases.
+* SETTINGS.cmd opens the native GL/GR mapping window in the same executable.
+  It edits only the local configuration. config.lock coordinates saves with
+  calibration; writes use a temporary file and atomic replacement. The window
+  does not install keyboard hooks, inject keyboard/mouse input or create macros.
 
 ## Check a download
 

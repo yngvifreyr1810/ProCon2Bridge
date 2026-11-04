@@ -18,6 +18,7 @@ try {
     }
     Write-Host 'Keep this window open. Press a button on the controller; hold SYNC for first pairing.'
     Write-Host 'Motion + rumble are automatic. Close with STOP.cmd. CALIBRATE.cmd fixes stationary gyro drift.'
+    Write-Host 'Use SETTINGS.cmd to map GL / GR back buttons while connected.'
     & (Join-Path $PSScriptRoot 'ProCon2Bridge.exe')
     if ($LASTEXITCODE) { throw 'Bridge stopped. Check bridge.log. Restart Windows if driver setup requested it.' }
 } catch {

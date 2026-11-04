@@ -39,6 +39,10 @@ class HDRumble(asyncio.DatagramProtocol):
 
     def connection_made(self, transport): self.transport=transport
 
+    def reset(self):
+        self.events.clear();self.owner=None;self.sequence=None;self.until=0
+        self.last=(SILENT,SILENT)
+
     def datagram_received(self, data, addr):
         if addr[0]!='127.0.0.1': return
         if data==struct.pack('<4sI',b'PC2Q',1):

@@ -3,15 +3,18 @@
 Windows Bluetooth support for the **official Nintendo Switch 2 Pro Controller**,
 with buttons, sticks, gyro, accelerometer and vibration. GPL-3.0-or-later.
 
-**Gameplay testing so far: TOTK Recomp and Super Mario Odyssey / Power Moon Recomp
-only. Ryujinx, Eglantine and all other emulators have NOT been tested.**
+**Compatibility evidence:** TOTK Recomp and Super Mario Odyssey / Power Moon Recomp
+were tested during development. The project owner has additionally confirmed
+working input, motion and rumble in Switch emulators through the virtual **Switch
+Pro 1** protocol. Emulator names/versions and a complete game matrix were not
+recorded for that report; it is not a guarantee for every emulator or game.
 
 ## Download and run
 
 Before running, see [what the scripts do, permissions, checksums and removal](SECURITY.md).
 Project executables are currently unsigned; do not disable antivirus to run them.
 
-Download **ProCon2Bridge-0.2.0-windows-x64.zip** from [Releases](https://github.com/yngvifreyr1810/ProCon2Bridge/releases).
+Download **ProCon2Bridge-0.3.0-windows-x64.zip** from [Releases](https://github.com/yngvifreyr1810/ProCon2Bridge/releases).
 Extract to a writable folder and double-click **START.cmd**. Python is not needed.
 First launch installs the bundled, signed USB/IP driver; accept Windows' administrator
 prompt and restart Windows if requested. Keep the bridge window open.
@@ -27,26 +30,56 @@ can preserve native motion access. No manual Bluetooth MAC configuration is need
 controller flat and untouched for a few seconds. Keep `config.json` when upgrading;
 it contains your local calibration and is created automatically on first launch.
 
+## Map the GL / GR back buttons
+
+Double-click **SETTINGS.cmd** (or run `ProCon2Bridge.exe --settings`). Choose an
+action for **GL (left)** and **GR (right)**, then **Save mappings**. You can select
+one existing Switch Pro button from the list or type a simultaneous chord such
+as `ZL + ZR` (up to four buttons). `NONE` disables that back button.
+
+Changes apply to the running bridge within one second, without reconnecting.
+The window also shows held back buttons and virtual output; hold a button for
+one second to see it in the status display. Physical face buttons keep working
+when their target is also assigned to GL/GR. Mapping is held/released with the
+physical back button; there is no turbo, timed macro or keyboard injection.
+
+Example: GL = `B`, GR = `A`. Button names follow **Nintendo** labeling. These are
+aliases/chords of Switch Pro 1 buttons, not two additional native game buttons.
+Existing configuration and gyro calibration survive updates. Manual mappings can
+still use legacy strings or lists, e.g. `"GL": ["ZL", "ZR"]`.
+
 ## Supported paths and limits
 
 | Use | Input and motion | Vibration |
 | --- | --- | --- |
 | Native SDL games / Steam with Switch Pro input | Virtual Switch Pro HID, gyro and accelerometer | Classic Switch rumble translated to Pro 2 BLE |
-| Ryujinx / Eglantine | Select virtual Pro Controller; DSU motion at 127.0.0.1:26760 where supported | Depends on the emulator's output support; not hardware-tested here |
+| Switch emulators (owner-confirmed; versions not recorded) | Virtual Switch Pro 1 input and motion; optional DSU at 127.0.0.1:26760 where supported | Owner confirmed working output through Switch Pro 1; emulator-specific settings still apply |
 | [PowerMoon-Switch2Pro](https://github.com/yngvifreyr1810/PowerMoon-Switch2Pro) | Native motion adapter in that fork | Direct per-side, per-band frequency/amplitude transport; experimental physical calibration |
 
 This is a **user-mode bridge using a third-party signed virtual USB driver**,
 not a new signed Nintendo kernel driver. Windows 11 x64 was tested; other Windows
 versions, Bluetooth adapters and third-party controllers remain unverified.
 USB cable transport, NFC, audio/headphone support and native GameChat are not implemented.
-GL/GR/C can be mapped to existing controls in `config.json`; they are not extra
-native Switch 1 buttons. Pairing back to a console may require SYNC again.
+GL/GR can be configured in the settings window; C and other advanced mappings
+remain in `config.json`. Pairing back to a console may require SYNC again.
 
 **HD Rumble 2 fidelity is not guaranteed.** The direct path retains the game's
 individual effect parameters; the frequency-to-physical-carrier profile is
 experimental. See [HD-RUMBLE.md](HD-RUMBLE.md), [verification](VERIFICATION.md),
 and [credits/licenses](THIRD_PARTY.md). Do not equate standard SDL rumble with
 lossless HD Rumble or advertise console-identical output.
+
+## Windows 11 Bluetooth improvements
+
+Version 0.3.0 adds fresh GATT discovery fallback after a stale reconnect cache,
+checks all required characteristics before initialization, explicitly releases
+the Windows throughput-preference request, bounds BLE haptic writes and keeps
+input-loss recovery independent of rumble. The virtual controller remains present
+while the physical controller reconnects; held controls are released on loss.
+No Bluetooth adapter power settings, registry tweaks or priority hacks are applied.
+
+See [the Switch2Connect comparison](UPSTREAM-REVIEW.md) for inherited code,
+new adaptations and features deliberately outside this focused bridge's scope.
 
 ## Build and contribute
 
