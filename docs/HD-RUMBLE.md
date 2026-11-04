@@ -41,6 +41,6 @@ Power Moon enables this only for the bridge's specific virtual identity and when
 the endpoint reports a connected controller. Otherwise it falls back to ordinary
 SDL vibration. Toggle the experimental option in F1 > Controls to compare modes.
 
-References and original authors are listed in THIRD_PARTY.md. User testing found
+References and original authors are listed in [THIRD_PARTY.md](THIRD_PARTY.md). User testing found
 correct gameplay event timing, a working 2-second test, and a modest subjective
 improvement. There has been no instrumented or blind console comparison.

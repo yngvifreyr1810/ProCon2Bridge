@@ -13,7 +13,7 @@ try {
     } catch {} finally { $taskProbe.Dispose() }
     if (-not (Test-Path "$env:ProgramFiles\USBip\usbip.exe") -or -not (Test-Path 'HKLM:\SYSTEM\CurrentControlSet\Services\usbip2_ude')) {
         Write-Host 'First launch: installing the signed USB/IP driver. Accept the Windows administrator prompt.'
-        & (Join-Path $PSScriptRoot 'INSTALL-DRIVER.ps1')
+        & (Join-Path $PSScriptRoot 'scripts\INSTALL-DRIVER.ps1')
         if ($LASTEXITCODE -and $LASTEXITCODE -notin @(0,3010)) { throw 'Driver setup did not complete.' }
     }
     Write-Host 'Keep this window open. Press a button on the controller; hold SYNC for first pairing.'

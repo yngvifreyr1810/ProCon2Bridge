@@ -1,7 +1,7 @@
 """GPL-3.0-or-later. Loopback transport retaining per-side, per-band effects.
 
 Frequency codes are an experimental logarithmic profile, not measured HD Rumble 2
-calibration. See HD-RUMBLE.md. No Nintendo waveform or firmware is included.
+calibration. See docs/HD-RUMBLE.md. No Nintendo waveform or firmware is included.
 """
 import asyncio
 from collections import deque

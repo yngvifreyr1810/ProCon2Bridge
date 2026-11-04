@@ -1,7 +1,7 @@
 """Pro Controller 2 BLE protocol adapter. SPDX-License-Identifier: GPL-3.0-or-later.
 
 Protocol layouts: Switch2Connect (TommyWabg) and pad2go (Patrick DeAngelis).
-See THIRD_PARTY.md. This is an experimental user-mode bridge, not a signed driver.
+See docs/THIRD_PARTY.md. This is an experimental user-mode bridge, not a signed driver.
 """
 import math
 import struct

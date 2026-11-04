@@ -8,7 +8,7 @@ antivirus engines will approve every build or that software can be risk-free.
 
 * START.cmd calls the included readable START.ps1, then ProCon2Bridge.exe.
   On first use only, it installs the unmodified USB/IP 0.9.8.1 driver from
-  drivers/. INSTALL-DRIVER.ps1 checks its pinned SHA-256 and Windows Authenticode
+  drivers/. scripts/INSTALL-DRIVER.ps1 checks its pinned SHA-256 and Windows Authenticode
   signature **before** requesting administrator rights and running the installer.
 * The bridge reads controller input over Bluetooth and exposes a virtual Switch
   Pro gamepad. It writes a pairing record to the controller; SYNC may be needed

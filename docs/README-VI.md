@@ -26,5 +26,5 @@ Ngoài TOTK Recomp và SMO Recomp đã thử trong quá trình phát triển, ch
 đã xác nhận rung/motion hoạt động với giả lập qua giao thức Switch Pro 1 và GL/GR
 hoạt động đúng trong bản 0.3.0. Chưa ghi lại tên/phiên bản giả lập cho báo cáo đó;
 không khẳng định mọi giả lập hoặc mọi game đều tương thích.
-Đọc README.md, HD-RUMBLE.md và THIRD_PARTY.md để biết phạm vi và nguồn tham khảo.
+Đọc [README](../README.md), [HD-RUMBLE](HD-RUMBLE.md) và [THIRD_PARTY](THIRD_PARTY.md) để biết phạm vi và nguồn tham khảo.
 Gói không chứa game, keys, firmware, dữ liệu trích xuất hay log cá nhân.

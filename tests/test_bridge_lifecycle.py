@@ -13,7 +13,7 @@ class LifecycleTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
         self.root=Path(self.temp.name)
-        shutil.copy(Path(__file__).parent/'config.example.json',self.root/'config.example.json')
+        shutil.copy(Path(__file__).parent.parent/'config.example.json',self.root/'config.example.json')
         self.patch=patch('bridge.ROOT',self.root);self.patch.start();self.addCleanup(self.patch.stop)
         self.instance=bridge.Bridge(load_config(self.root/'config.json'),SimpleNamespace(calibrate=False),self.root/'config.json')
         self.states=[];self.instance.server=SimpleNamespace(update_state=self.states.append)

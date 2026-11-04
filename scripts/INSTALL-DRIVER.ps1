@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 $env:PSModulePath = (Join-Path $PSHOME 'Modules') + [IO.Path]::PathSeparator + $env:PSModulePath
-$taskRoot = $PSScriptRoot
+$taskRoot = Split-Path -Parent $PSScriptRoot
 $installer = Join-Path $taskRoot 'drivers\USBip-0.9.8.1-x64.exe'
 $expected = '38CAD6D4432B52D5BB9409D9AD03B72FDFFC4ADA4CD3A48FBECA1A2752A8518A'
 if ((Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash -ne $expected) {

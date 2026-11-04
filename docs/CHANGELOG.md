@@ -1,3 +1,8 @@
+## 0.3.1
+
+* Organize source, tests, documentation and maintenance scripts into folders.
+* Keep root launch commands and improve packaged source layout.
+
 # Changes
 
 ## 0.3.0

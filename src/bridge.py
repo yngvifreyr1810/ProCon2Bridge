@@ -25,7 +25,7 @@ from configuration import load_config,update_config
 from ble_connection import controller_connection,request_throughput,release_request
 from version import __version__
 
-ROOT = Path(sys.executable).parent if getattr(sys,'frozen',False) else Path(__file__).resolve().parent
+ROOT = Path(sys.executable).parent if getattr(sys,'frozen',False) else Path(__file__).resolve().parent.parent
 LOG = logging.getLogger('ProCon2Bridge')
 BUS = '8-32'
 USBIP = Path(os.environ.get('ProgramFiles',r'C:\Program Files'))/'USBip'/'usbip.exe'

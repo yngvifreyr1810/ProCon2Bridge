@@ -35,7 +35,7 @@ class ConfigTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
         self.path=Path(self.temp.name)/'config.json'
-        shutil.copy(Path(__file__).parent/'config.example.json',self.path.parent/'config.example.json')
+        shutil.copy(Path(__file__).parent.parent/'config.example.json',self.path.parent/'config.example.json')
 
     def test_initial_config_and_concurrent_mapping_calibration_preserve_fields(self):
         cfg=load_config(self.path);self.assertEqual(cfg['button_mapping']['GL'],'NONE')

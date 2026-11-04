@@ -1,5 +1,7 @@
 # ProCon2Bridge
 
+[Tiếng Việt](docs/README-VI.md)
+
 Windows Bluetooth support for the **official Nintendo Switch 2 Pro Controller**,
 with buttons, sticks, gyro, accelerometer and vibration. GPL-3.0-or-later.
 
@@ -8,6 +10,12 @@ were tested during development. The project owner has additionally confirmed
 working input, motion and rumble in Switch emulators through the virtual **Switch
 Pro 1** protocol. Emulator names/versions and a complete game matrix were not
 recorded for that report; it is not a guarantee for every emulator or game.
+
+## Repository layout
+
+The root keeps the quick-start commands, project overview and default configuration.
+Implementation lives in `src/`, automated checks in `tests/`, long-form guides and
+credits in `docs/`, and build / driver maintenance tools in `scripts/`.
 
 ## Download and run
 
@@ -65,8 +73,8 @@ remain in `config.json`. Pairing back to a console may require SYNC again.
 
 **HD Rumble 2 fidelity is not guaranteed.** The direct path retains the game's
 individual effect parameters; the frequency-to-physical-carrier profile is
-experimental. See [HD-RUMBLE.md](HD-RUMBLE.md), [verification](VERIFICATION.md),
-and [credits/licenses](THIRD_PARTY.md). Do not equate standard SDL rumble with
+experimental. See [HD-RUMBLE.md](docs/HD-RUMBLE.md), [verification](docs/VERIFICATION.md),
+and [credits/licenses](docs/THIRD_PARTY.md). Do not equate standard SDL rumble with
 lossless HD Rumble or advertise console-identical output.
 
 ## Windows 11 Bluetooth improvements
@@ -78,16 +86,21 @@ input-loss recovery independent of rumble. The virtual controller remains presen
 while the physical controller reconnects; held controls are released on loss.
 No Bluetooth adapter power settings, registry tweaks or priority hacks are applied.
 
-See [the Switch2Connect comparison](UPSTREAM-REVIEW.md) for inherited code,
+See [the Switch2Connect comparison](docs/UPSTREAM-REVIEW.md) for inherited code,
 new adaptations and features deliberately outside this focused bridge's scope.
 
 ## Build and contribute
 
 On Windows x64 with Python 3.14: `python -m venv .venv`, activate it,
-`python -m pip install -r requirements.txt`, `python -m unittest discover -v`,
-then `powershell -ExecutionPolicy Bypass -File BUILD.ps1`.
-Obtain the unchanged driver installer linked in THIRD_PARTY.md for a source build;
-the binary release bundles it. BUILD.ps1 does not install drivers.
+`python -m pip install -r requirements.txt`, then run these PowerShell commands:
+
+```powershell
+$env:PYTHONPATH = 'src'
+python -m unittest discover -s tests -t . -v
+powershell -ExecutionPolicy Bypass -File scripts/BUILD.ps1
+```
+Obtain the unchanged driver installer linked in docs/THIRD_PARTY.md for a source build;
+the binary release bundles it. scripts/BUILD.ps1 does not install drivers.
 
 All bridge source is included in binary downloads. Runtime logs, physical device
 addresses and calibration are intentionally excluded from Git and release files.

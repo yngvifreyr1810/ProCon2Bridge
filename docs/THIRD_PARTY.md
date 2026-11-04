@@ -9,7 +9,7 @@ The separate USB/IP kernel driver is third-party software.
   pinned commit e5dd90bb54106b35a1110f96ec9d060390e5d096.
   `vendor/usbip_server.py` is copied unmodified from `src/usbip_server.py`.
   BLE initialization, pairing, memory/calibration layout, haptic packet layout,
-  and Switch 1 rumble conversion in `protocol.py`/`bridge.py` are adapted from
+  and Switch 1 rumble conversion in `src/protocol.py`/`src/bridge.py` are adapted from
   that project. The conversion does not guarantee identical HD Rumble 2 effects.
   `native_pro.py` subclasses the upstream server with a HID-only descriptor,
   64-byte USB reports, priority ACK handling, neutral virtual sensor calibration,
@@ -30,7 +30,7 @@ The separate USB/IP kernel driver is third-party software.
   `core/src/hd_rumble.c` informed the experimental logarithmic frequency profile
   (anchor 274 at 160 Hz, slope 117 codes/octave). That upstream model is itself
   unmeasured and its repository identifies hardware testing as incomplete.
-  The MIT notice is included in dependency-licenses/switch2-pico-MIT.txt.
+  The MIT notice is included in ../dependency-licenses/switch2-pico-MIT.txt.
 * Linux input / hid-nintendo2, Vicki Pfau and contributors, GPL-2.0:
   https://marc.info/?l=linux-input&m=178280949199923&w=2
   Published idle carrier observations and 450 reference amplitude were consulted.
@@ -45,18 +45,18 @@ The separate USB/IP kernel driver is third-party software.
   Switch 2 physical frequency mapping. No firmware or game material is included.
 * USB/IP for Windows, Vadym Hrynchyshyn and contributors:
   https://github.com/vadimgrn/usbip-win2/releases/tag/v.0.9.8.1
-  The unmodified upstream installer is included under `drivers/` and retains
+  The unmodified upstream installer is included under `../drivers/` and retains
   its BSD-2-Clause license and digital signature. The full notice is included in
-  drivers/LICENSE-usbip-win2.txt. It is not part of this project's source.
+  ../drivers/LICENSE-usbip-win2.txt. It is not part of this project's source.
   SHA256: 38cad6d4432b52d5bb9409d9ad03b72fdffc4ada4cd3a48fbeca1a2752a8518a.
 * Bleak and PyWinRT provide Windows Bluetooth access; Python and PyInstaller
   provide the runtime and executable packaging; the settings window uses Python
   Tkinter with Tcl/Tk. Corresponding dependency licenses, including Tcl/Tk license
-  terms, are included in `dependency-licenses/`.
+  terms, are included in `../dependency-licenses/`.
 
 All ProCon2Bridge Python source is included next to the executable. Build with
 Python 3.14 on Windows, install `requirements.txt` in a virtual environment,
-then run `BUILD.ps1`. Changes to the upstream USB/IP source are not needed.
+then run `../scripts/BUILD.ps1`. Changes to the upstream USB/IP source are not needed.
 
 No controller firmware is modified. Pairing stores the PC adapter address on
 the controller; returning to a Switch console may require pairing it again.
