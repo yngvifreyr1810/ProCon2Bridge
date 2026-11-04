@@ -1,3 +1,7 @@
+## 0.3.2
+
+* Prefix Windows entry-point and maintenance script names with ProCon2Bridge.
+
 ## 0.3.1
 
 * Organize source, tests, documentation and maintenance scripts into folders.
@@ -7,7 +11,7 @@
 
 ## 0.3.0
 
-* Native SETTINGS.cmd window for GL/GR: one button or a simultaneous chord,
+* Native ProCon2Bridge-Settings.cmd window for GL/GR: one button or a simultaneous chord,
   immediate live reload, overlap-safe hold/release and preserved calibration.
 * Windows 11 BLE recovery: GATT validation, fresh discovery fallback, explicit
   throughput-request cleanup, bounded haptic writes and fixed packet cadence.

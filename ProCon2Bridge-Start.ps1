@@ -13,12 +13,12 @@ try {
     } catch {} finally { $taskProbe.Dispose() }
     if (-not (Test-Path "$env:ProgramFiles\USBip\usbip.exe") -or -not (Test-Path 'HKLM:\SYSTEM\CurrentControlSet\Services\usbip2_ude')) {
         Write-Host 'First launch: installing the signed USB/IP driver. Accept the Windows administrator prompt.'
-        & (Join-Path $PSScriptRoot 'scripts\INSTALL-DRIVER.ps1')
+        & (Join-Path $PSScriptRoot 'scripts\ProCon2Bridge-Install-Driver.ps1')
         if ($LASTEXITCODE -and $LASTEXITCODE -notin @(0,3010)) { throw 'Driver setup did not complete.' }
     }
     Write-Host 'Keep this window open. Press a button on the controller; hold SYNC for first pairing.'
-    Write-Host 'Motion + rumble are automatic. Close with STOP.cmd. CALIBRATE.cmd fixes stationary gyro drift.'
-    Write-Host 'Use SETTINGS.cmd to map GL / GR back buttons while connected.'
+    Write-Host 'Motion + rumble are automatic. Close with ProCon2Bridge-Stop.cmd. ProCon2Bridge-Calibrate.cmd fixes stationary gyro drift.'
+    Write-Host 'Use ProCon2Bridge-Settings.cmd to map GL / GR back buttons while connected.'
     & (Join-Path $PSScriptRoot 'ProCon2Bridge.exe')
     if ($LASTEXITCODE) { throw 'Bridge stopped. Check bridge.log. Restart Windows if driver setup requested it.' }
 } catch {

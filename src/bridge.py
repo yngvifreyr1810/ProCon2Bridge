@@ -272,7 +272,7 @@ class Bridge:
 
     async def run(self):
         if not self.options.monitor:
-            if not USBIP.is_file(): raise RuntimeError('USB/IP driver missing. Run INSTALL-DRIVER.cmd once, then START.cmd.')
+            if not USBIP.is_file(): raise RuntimeError('USB/IP driver missing. Run scripts\ProCon2Bridge-Install-Driver.cmd once, then ProCon2Bridge-Start.cmd.')
             self.server = NativeProServer(host='127.0.0.1',port=self.cfg['usbip_port'],
                 bus_id=BUS,mac_address='02:50:43:32:00:01',on_rumble_callback=self.feedback)
             self.server.start()

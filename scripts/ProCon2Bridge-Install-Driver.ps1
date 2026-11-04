@@ -19,4 +19,4 @@ $result = @{exit_code=$process.ExitCode;installed_at=(Get-Date -Format o);instal
 $result | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $taskRoot 'driver-install-result.json') -Encoding UTF8
 if ($process.ExitCode -notin @(0,3010)) { throw "USB/IP installation failed: $($process.ExitCode). See driver-install.log." }
 if (-not $result.exe_present -or -not $result.driver_present) { throw 'USB/IP installation incomplete. See driver-install.log.' }
-Write-Host 'USB/IP installed. Run START.cmd. If Windows requests a reboot, reboot first.'
+Write-Host 'USB/IP installed. Run ProCon2Bridge-Start.cmd. If Windows requests a reboot, reboot first.'

@@ -56,7 +56,7 @@ The separate USB/IP kernel driver is third-party software.
 
 All ProCon2Bridge Python source is included next to the executable. Build with
 Python 3.14 on Windows, install `requirements.txt` in a virtual environment,
-then run `../scripts/BUILD.ps1`. Changes to the upstream USB/IP source are not needed.
+then run `../scripts/ProCon2Bridge-Build.ps1`. Changes to the upstream USB/IP source are not needed.
 
 No controller firmware is modified. Pairing stores the PC adapter address on
 the controller; returning to a Switch console may require pairing it again.

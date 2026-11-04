@@ -22,8 +22,8 @@ credits in `docs/`, and build / driver maintenance tools in `scripts/`.
 Before running, see [what the scripts do, permissions, checksums and removal](SECURITY.md).
 Project executables are currently unsigned; do not disable antivirus to run them.
 
-Download **ProCon2Bridge-0.3.0-windows-x64.zip** from [Releases](https://github.com/yngvifreyr1810/ProCon2Bridge/releases).
-Extract to a writable folder and double-click **START.cmd**. Python is not needed.
+Download **ProCon2Bridge-0.3.2-windows-x64.zip** from [Releases](https://github.com/yngvifreyr1810/ProCon2Bridge/releases).
+Extract to a writable folder and double-click **ProCon2Bridge-Start.cmd**. Python is not needed.
 First launch installs the bundled, signed USB/IP driver; accept Windows' administrator
 prompt and restart Windows if requested. Keep the bridge window open.
 
@@ -34,13 +34,13 @@ button labels. In Steam, enable the game's Nintendo/Switch Pro controller suppor
 as needed. For games reading SDL directly, disabling Steam Input for that game
 can preserve native motion access. No manual Bluetooth MAC configuration is needed.
 
-**STOP.cmd** disconnects cleanly. **CALIBRATE.cmd** restarts calibration: leave the
+**ProCon2Bridge-Stop.cmd** disconnects cleanly. **ProCon2Bridge-Calibrate.cmd** restarts calibration: leave the
 controller flat and untouched for a few seconds. Keep `config.json` when upgrading;
 it contains your local calibration and is created automatically on first launch.
 
 ## Map the GL / GR back buttons
 
-Double-click **SETTINGS.cmd** (or run `ProCon2Bridge.exe --settings`). Choose an
+Double-click **ProCon2Bridge-Settings.cmd** (or run `ProCon2Bridge.exe --settings`). Choose an
 action for **GL (left)** and **GR (right)**, then **Save mappings**. You can select
 one existing Switch Pro button from the list or type a simultaneous chord such
 as `ZL + ZR` (up to four buttons). `NONE` disables that back button.
@@ -79,7 +79,7 @@ lossless HD Rumble or advertise console-identical output.
 
 ## Windows 11 Bluetooth improvements
 
-Version 0.3.0 adds fresh GATT discovery fallback after a stale reconnect cache,
+Version 0.3.2 adds fresh GATT discovery fallback after a stale reconnect cache,
 checks all required characteristics before initialization, explicitly releases
 the Windows throughput-preference request, bounds BLE haptic writes and keeps
 input-loss recovery independent of rumble. The virtual controller remains present
@@ -97,10 +97,10 @@ On Windows x64 with Python 3.14: `python -m venv .venv`, activate it,
 ```powershell
 $env:PYTHONPATH = 'src'
 python -m unittest discover -s tests -t . -v
-powershell -ExecutionPolicy Bypass -File scripts/BUILD.ps1
+powershell -ExecutionPolicy Bypass -File scripts/ProCon2Bridge-Build.ps1
 ```
 Obtain the unchanged driver installer linked in docs/THIRD_PARTY.md for a source build;
-the binary release bundles it. scripts/BUILD.ps1 does not install drivers.
+the binary release bundles it. scripts/ProCon2Bridge-Build.ps1 does not install drivers.
 
 All bridge source is included in binary downloads. Runtime logs, physical device
 addresses and calibration are intentionally excluded from Git and release files.
