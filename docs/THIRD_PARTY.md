@@ -60,3 +60,5 @@ then run `../scripts/ProCon2Bridge-Build.ps1`. Changes to the upstream USB/IP so
 
 No controller firmware is modified. Pairing stores the PC adapter address on
 the controller; returning to a Switch console may require pairing it again.
+
+* pystray 0.19.5 (LGPL-3.0), https://github.com/moses-palmer/pystray: Windows notification-area icon and menu. Pillow 13.0.0 (MIT-CMU / HPND), https://github.com/python-pillow/Pillow: programmatically drawn controller icon. six 1.17.0 (MIT), https://github.com/benjaminp/six: pystray compatibility dependency. Corresponding notices are in `../dependency-licenses/`; these packages are unmodified. The tray image is drawn by this project and uses no third-party game artwork.

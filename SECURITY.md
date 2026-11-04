@@ -20,7 +20,7 @@ antivirus engines will approve every build or that software can be risk-free.
   create scheduled tasks or services, disable antivirus, or add firewall exceptions. No telemetry
   or remote data upload is implemented in this bridge. Building from source
   separately downloads Python dependencies when you request pip install.
-* config.json, status.json and rotating bridge.log stay beside the program.
+* config.json, status.json and rotating bridge.log stay in the installed app folder.
   They may contain calibration, controller/adapter information and device addresses.
   Do not upload them without reviewing/redacting them. They are excluded from releases.
 * ProCon2Bridge-Settings.cmd opens the native GL/GR mapping window in the same executable.
@@ -46,13 +46,19 @@ not change the system's saved execution policy. This flag is not a security endo
 
 ## Stop and remove
 
-Run ProCon2Bridge-Stop.cmd, close its windows, and delete the extracted package if no longer
-needed. If you also want to remove the separately installed USB/IP driver, use
-Windows Settings > Apps > Installed apps > USB/IP for Windows. Keep it if another
-USB/IP application still needs it. On first launch, the start script adds one
-value to the current user's Windows Run key for ProCon2Bridge.exe. It is visible
-in Task Manager > Startup apps and can be disabled there; no scheduled task or
-service is installed.
+Use **Exit ProCon2Bridge** in the notification-area menu (or ProCon2Bridge-Stop.cmd).
+The EXE copies the app and supporting files to `%LOCALAPPDATA%/Programs/ProCon2Bridge`.
+On first launch it adds a per-user Startup-folder shortcut to that installed EXE
+and removes the legacy ProCon2Bridge Run value to prevent duplicate startup.
+Task Manager > Startup apps can disable this shortcut; the app does not edit
+Windows StartupApproved settings or re-enable entries disabled by the user.
+
+To remove: exit the bridge, delete ProCon2Bridge.lnk from the folder opened by
+`shell:startup`, then delete the installed app folder. Back up config.json first
+if you want to keep calibration/mappings. Remove USB/IP separately in Windows
+Installed apps only if other USB/IP applications do not need it.
+No scheduled task or bridge service is installed. The tray uses pystray and Pillow;
+licenses and source links are included in docs/THIRD_PARTY.md.
 
 ## Tiếng Việt
 
@@ -61,6 +67,6 @@ Gói này có source và mã SHA-256 để bạn tự kiểm tra, nhưng đó kh
 khi cần; quyền quản trị dùng cho bước cài driver. File exe của project chưa được
 ký số. Không cần tắt Defender hay thêm ngoại lệ antivirus. Cấu hình và log nằm
 tại máy của bạn, có thể chứa địa chỉ thiết bị; đừng chia sẻ nguyên log công khai.
-Chạy ProCon2Bridge-Stop.cmd để dừng, xóa thư mục giải nén để bỏ bridge; driver gỡ riêng trong
+Thoát qua tray, xóa shortcut ProCon2Bridge trong shell:startup và thư mục cài đặt để bỏ bridge; driver gỡ riêng trong
 Installed apps. Báo vấn đề bảo mật qua mục Security của repository nếu có kênh
 riêng; nếu không, chỉ đăng mô tả đã bỏ thông tin nhạy cảm, không đăng keys/log thô.

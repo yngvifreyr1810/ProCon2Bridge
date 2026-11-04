@@ -22,29 +22,34 @@ credits in `docs/`, and build / driver maintenance tools in `scripts/`.
 Before running, see [what the scripts do, permissions, checksums and removal](SECURITY.md).
 Project executables are currently unsigned; do not disable antivirus to run them.
 
-Download **ProCon2Bridge-0.3.3-windows-x64.zip** from [Releases](https://github.com/yngvifreyr1810/ProCon2Bridge/releases).
-Extract to a writable folder and double-click **ProCon2Bridge-Start.cmd**. Python is not needed.
-First launch installs the bundled, signed USB/IP driver; accept Windows' administrator
-prompt and restart Windows if requested. Keep the bridge window open.
+Download **ProCon2Bridge-0.4.0-windows-x64.zip** from [Releases](https://github.com/yngvifreyr1810/ProCon2Bridge/releases).
+Extract the complete ZIP, then double-click **ProCon2Bridge.exe**. Python is not needed.
+The EXE installs the app for your Windows account in
+`%LOCALAPPDATA%/Programs/ProCon2Bridge`, registers startup, and runs in the
+notification area beside the clock. First-time driver setup may ask for Windows
+administrator approval. Restart Windows if the driver installer requests it.
 
-Hold the controller's **SYNC** button on first use, then leave it flat and still
-for a few seconds for automatic gyro calibration. Afterwards, press a button to
-reconnect. It appears in games as a **Nintendo Switch Pro Controller**. Use Nintendo
-button labels. In Steam, enable the game's Nintendo/Switch Pro controller support
-as needed. For games reading SDL directly, disabling Steam Input for that game
-can preserve native motion access. No manual Bluetooth MAC configuration is needed.
+After setup, press a controller button to reconnect; hold SYNC for initial pairing.
+The bridge keeps running without a CMD window. Right-click its blue controller
+icon for **Settings**, **Calibrate motion**, **Windows Startup settings**, logs,
+or **Exit ProCon2Bridge**. Launching the EXE again opens settings instead of
+starting another bridge. Legacy Start/Settings/Stop scripts remain available.
 
-**ProCon2Bridge-Stop.cmd** disconnects cleanly. **ProCon2Bridge-Calibrate.cmd** restarts calibration: leave the
-controller flat and untouched for a few seconds. Keep `config.json` when upgrading;
-it contains your local calibration and is created automatically on first launch.
+The installed app has a fixed location, so moving or deleting the downloaded ZIP
+or extracted package does not break startup. Your configuration and logs are in
+the installed app folder. An existing `config.json` beside the downloaded EXE is
+migrated only when no installed configuration exists; upgrades preserve the
+installed calibration and GL/GR mappings.
 
 ## Start automatically with Windows
 
-The first time you start ProCon2Bridge, its launcher adds a per-user Windows
-startup entry for `ProCon2Bridge.exe`. It launches the bridge at sign-in and
-appears in **Task Manager > Startup apps** as **ProCon2Bridge**; disable it there
-whenever you prefer manual launch. No scheduled task or Windows service is used.
-Keep the extracted bridge folder in place so Windows can find the executable.
+First EXE launch creates **ProCon2Bridge.lnk** in the current user's Windows
+Startup folder, targeting the installed EXE. It appears as **ProCon2Bridge** in
+**Task Manager > Startup apps** and **Settings > Apps > Startup**.
+Disable it there whenever you prefer manual launch. The app does not overwrite
+Windows' enabled/disabled choice. No scheduled task or bridge service is used.
+Startup waits and retries when Bluetooth or the virtual controller is not ready
+immediately after sign-in. Exit from the tray stops the bridge for this session.
 
 ## Map the GL / GR back buttons
 

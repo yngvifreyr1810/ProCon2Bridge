@@ -13,6 +13,7 @@ import socket
 import struct
 import sys
 import time
+import threading
 
 from bleak import BleakClient, BleakScanner
 from protocol import (BUTTONS, WRITE, RESPONSE, INPUT, RUMBLE, INIT, SILENT,
@@ -86,6 +87,7 @@ class Bridge:
         self.ever_connected = False
         self.config_stamp = None
         self.background_tasks = set()
+        self.transports = []
 
     def status(self):
         data = dict(version=__version__,state=self.state,address=self.address,report_count=self.count,
@@ -272,7 +274,7 @@ class Bridge:
 
     async def run(self):
         if not self.options.monitor:
-            if not USBIP.is_file(): raise RuntimeError('USB/IP driver missing. Run scripts\ProCon2Bridge-Install-Driver.cmd once, then ProCon2Bridge-Start.cmd.')
+            if not USBIP.is_file(): raise RuntimeError('USB/IP driver missing. Run ProCon2Bridge.exe from the complete release package.')
             self.server = NativeProServer(host='127.0.0.1',port=self.cfg['usbip_port'],
                 bus_id=BUS,mac_address='02:50:43:32:00:01',on_rumble_callback=self.feedback)
             self.server.start()
@@ -281,16 +283,24 @@ class Bridge:
             LOG.info('Virtual Switch Pro attached: %s',output)
         transport,_ = await self.loop.create_datagram_endpoint(lambda:self.dsu,
             local_addr=('127.0.0.1',self.cfg['dsu_port']))
+        self.transports.append(transport)
         hd_transport,_ = await self.loop.create_datagram_endpoint(lambda:self.hd,
             local_addr=('127.0.0.1',26761))
+        self.transports.append(hd_transport)
         ticker = asyncio.create_task(self.ticks())
         maintainer = asyncio.create_task(self.maintenance())
         try:
             while True:
                 self.state = 'scanning'; self.status()
                 LOG.info('Waiting for Pro Controller 2. Press a button, or hold SYNC for first pairing.')
-                device = await BleakScanner.find_device_by_filter(lambda d,a:is_pro2(d,a) and
-                    (not self.cfg['device_address'] or d.address.upper()==self.cfg['device_address'].upper()),timeout=20)
+                try:
+                    device = await BleakScanner.find_device_by_filter(lambda d,a:is_pro2(d,a) and
+                        (not self.cfg['device_address'] or d.address.upper()==self.cfg['device_address'].upper()),timeout=20)
+                except Exception as error:
+                    LOG.warning('Bluetooth scan unavailable; waiting for adapter: %s', error)
+                    self.state = 'waiting_for_bluetooth'; self.status()
+                    await asyncio.sleep(5)
+                    continue
                 if device is None: continue
                 self.address = device.address
                 self.state = 'connecting'; self.disconnected.clear(); self.status()
@@ -336,6 +346,8 @@ class Bridge:
             hd_transport.close()
 
     async def close(self):
+        for transport in self.transports: transport.close()
+        self.transports.clear()
         if self.client and self.client.is_connected:
             with contextlib.suppress(Exception): await self.write_rumble((SILENT,SILENT))
         if self.server:
@@ -347,7 +359,7 @@ class Bridge:
 
 def math_norm(values): return sum(v*v for v in values)**.5
 
-async def main(options):
+async def main(options, shutdown=None):
     cfg_path = ROOT/'config.json'
     cfg=load_config(cfg_path)
     options.calibrate=options.calibrate or not cfg.get('gyro_calibrated',any(cfg['gyro_bias']))
@@ -359,22 +371,43 @@ async def main(options):
         try:
             data = await asyncio.wait_for(reader.read(16),1)
             if data==b'stop\n':
-                stop.set(); writer.write(b'OK\n'); await writer.drain()
+                stop.set()
+                if shutdown is not None: shutdown.set()
+                writer.write(b'OK\n'); await writer.drain()
+            elif data==b'calibrate\n':
+                bridge.cal_samples.clear(); bridge.calibration_done=False
+                writer.write(b'OK\n'); await writer.drain()
         finally:
             writer.close()
     guard = await asyncio.start_server(control,'127.0.0.1',26759)
     running = asyncio.create_task(bridge.run())
-    stopping = asyncio.create_task(stop.wait())
+    async def wait_stop():
+        while not stop.is_set() and not (shutdown and shutdown.is_set()):
+            await asyncio.sleep(.2)
+    stopping = asyncio.create_task(wait_stop())
     try:
         done,_ = await asyncio.wait((running,stopping),timeout=options.duration or None,
             return_when=asyncio.FIRST_COMPLETED)
         if running in done: await running
     finally:
         running.cancel(); stopping.cancel()
-        with contextlib.suppress(asyncio.CancelledError): await running
-        with contextlib.suppress(asyncio.CancelledError): await stopping
-        await bridge.close()
-        guard.close(); await guard.wait_closed()
+        await asyncio.gather(running, stopping, return_exceptions=True)
+        try: await bridge.close()
+        finally:
+            guard.close(); await guard.wait_closed()
+
+async def desktop_main(options, shutdown):
+    # Bluetooth/USB services may not be ready immediately after Windows sign-in.
+    while not shutdown.is_set():
+        try:
+            await main(options, shutdown)
+            return
+        except Exception:
+            LOG.exception('Bridge unavailable; retrying in 5 seconds')
+            for _ in range(25):
+                if shutdown.is_set(): return
+                await asyncio.sleep(.2)
+
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description='ProCon2Bridge experimental Bluetooth driver bridge')
@@ -386,7 +419,16 @@ if __name__=='__main__':
     parser.add_argument('--verbose-usb',action='store_true',help='log USB initialization for diagnostics')
     parser.add_argument('--settings',action='store_true',help='open GL/GR back-button mapping window')
     parser.add_argument('--version',action='version',version=__version__)
+    parser.add_argument('--background',action='store_true',help=argparse.SUPPRESS)
     options = parser.parse_args()
+    desktop = os.name=='nt' and getattr(sys,'frozen',False) and not options.monitor
+    if desktop:
+        from desktop_runtime import prepare, message, send_control
+        try:
+            if options.calibrate and send_control('calibrate'): sys.exit(0)
+            if prepare(ROOT, options): sys.exit(0)
+        except Exception as error:
+            message(error, error=True); sys.exit(1)
     if options.settings:
         from settings_ui import open_settings
         open_settings(ROOT)
@@ -401,11 +443,28 @@ if __name__=='__main__':
         except (OSError,RuntimeError) as error:
             print(f'No running bridge: {error}')
             sys.exit(1)
+    instance = tray = None
+    shutdown = threading.Event()
+    if desktop:
+        from desktop_runtime import SingleInstance, Tray
+        instance = SingleInstance()
+        if instance.existing:
+            instance.close()
+            from settings_ui import open_settings
+            open_settings(ROOT)
+            sys.exit(0)
     handler = RotatingFileHandler(ROOT/'bridge.log',maxBytes=2_000_000,backupCount=2,encoding='utf-8')
-    logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s',handlers=[handler,logging.StreamHandler()])
+    logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s',handlers=[handler]+([logging.StreamHandler()] if sys.stderr is not None else []))
     logging.getLogger('vendor.usbip_server').setLevel(logging.INFO if options.verbose_usb else logging.WARNING)
-    try: asyncio.run(main(options))
+    try:
+        if desktop: tray = Tray(ROOT, shutdown)
+        asyncio.run(desktop_main(options, shutdown) if desktop and not options.duration else main(options))
     except KeyboardInterrupt: pass
     except Exception:
         LOG.exception('Bridge stopped with an error')
+        if desktop: message('ProCon2Bridge stopped. See bridge.log in the installed app folder.', error=True)
         sys.exit(1)
+    finally:
+        shutdown.set()
+        if tray: tray.close()
+        if instance: instance.close()

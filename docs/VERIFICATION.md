@@ -34,3 +34,19 @@ versions and USB cable transport have not been validated.
 Raw hardware captures, device addresses, machine paths, calibration and logs are
 excluded from publication. This document summarizes observations, not universal
 compatibility or lossless HD Rumble certification.
+
+
+## 0.4.0 background app
+
+Local Windows 11 validation: the installed windowless EXE ran from LocalAppData
+with no console window. Windows Settings > Apps > Startup visibly listed
+ProCon2Bridge.exe as On. Its Startup-folder shortcut targets the installed EXE;
+the legacy Run value was removed. After turning Bluetooth on, the running app
+connected without restarting it. SDL3 opened the virtual Nintendo Switch Pro
+Controller, enabled accelerometer and gyro and returned changing sensor and
+stick values. The bridge observed A/B and GL/GR input with zero invalid reports.
+SDL accepted both rumble calls and the user confirmed feeling two pulses.
+Configuration migration preserved GL=B / GR=A. Automated lifecycle checks cover
+cleanup after failed initialization, interruptible startup retry and upgrade
+preservation without re-enabling disabled startup. Actual Windows restart is
+pending the user's manual test; do not present it as verified.

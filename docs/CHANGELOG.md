@@ -1,3 +1,11 @@
+## 0.4.0
+
+* Run ProCon2Bridge.exe directly: per-user installation, Startup registration, notification-area menu, no console window.
+* Store the installed app at a stable LocalAppData path; preserve configuration on upgrades.
+* Replace the legacy Run value with a Task Manager-manageable Startup shortcut and respect disabled entries.
+* Open settings on repeat launch; calibrate without stopping the bridge; exit cleanly from the tray.
+* Retry startup when Bluetooth/USB services are not ready and release resources after failed initialization.
+
 ## 0.3.3
 
 * Add a per-user Windows Run entry on first launch.
