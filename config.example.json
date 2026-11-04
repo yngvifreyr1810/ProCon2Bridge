@@ -1,0 +1,12 @@
+{
+  "device_address": "",
+  "host_mac": "auto",
+  "deadzone": 0.06,
+  "gyro_scale": 1.0,
+  "gyro_bias": [0, 0, 0],
+  "gyro_calibrated": false,
+  "rumble_strength": 1.0,
+  "button_mapping": {"GL": "NONE", "GR": "NONE", "C": "NONE"},
+  "dsu_port": 26760,
+  "usbip_port": 3240
+}
