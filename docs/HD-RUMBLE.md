@@ -4,7 +4,7 @@ The ordinary path receives the virtual Switch 1 controller's rumble bytes. Their
 translation is approximate. SDL_RumbleGamepad itself exposes two motor strengths;
 it does not preserve the original game's four independently controlled bands.
 
-PowerMoon-Switch2Pro instead sends eight float values over loopback UDP: LF amplitude,
+PowerfulMoon instead sends eight float values over loopback UDP: LF amplitude,
 LF frequency in Hz, HF amplitude, HF frequency, separately for left and right.
 Guest-thread updates are sent immediately rather than reduced to a 60 Hz render
 frame. Three different 5 ms subframes are retained per BLE packet, using a 15 ms

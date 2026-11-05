@@ -31,7 +31,7 @@ antivirus engines will approve every build or that software can be risk-free.
 ## Check a download
 
 Use the ZIP from this repository's Releases, compare it with the published
-CHECKSUMS-SHA256.txt using `Get-FileHash -Algorithm SHA256 <download.zip>`, and
+ProCon2Bridge-0.4.0-windows-x64.zip.sha256 using `Get-FileHash -Algorithm SHA256 <download.zip>`, and
 read the source matching the release tag. Checksums detect changed downloads;
 they do not prove the code is harmless or provide an independent security audit.
 You may build from source instead. Build instructions and dependency pins are included.

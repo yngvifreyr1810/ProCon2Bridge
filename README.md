@@ -1,123 +1,64 @@
 # ProCon2Bridge
 
-[Tiếng Việt](docs/README-VI.md)
+ProCon2Bridge provides Windows 11 x64 support for official Nintendo Switch 2 Pro Controllers connected via Bluetooth. It translates controller inputs to a virtual Switch Pro 1 controller interface, enabling digital buttons, analog sticks, motion sensors (gyroscope and accelerometer), rumble feedback, and remappable GL/GR back buttons.
 
-Windows Bluetooth support for the **official Nintendo Switch 2 Pro Controller**,
-with buttons, sticks, gyro, accelerometer and vibration. GPL-3.0-or-later.
+This repository contains no proprietary Nintendo software, firmware, SDKs, encryption keys, or extracted game assets.
 
-**Compatibility evidence:** TOTK Recomp and Super Mario Odyssey / Power Moon Recomp
-were tested during development. The project owner has additionally confirmed
-working input, motion and rumble in Switch emulators through the virtual **Switch
-Pro 1** protocol. Emulator names/versions and a complete game matrix were not
-recorded for that report; it is not a guarantee for every emulator or game.
+## Installation & Setup
 
-## Repository layout
+1. Download **ProCon2Bridge-0.4.0-windows-x64.zip** from [Releases](https://github.com/yngvifreyr1810/ProCon2Bridge/releases/tag/v0.4.0) and extract the complete ZIP.
+2. Run `ProCon2Bridge.exe` from the extracted folder. The application installs itself locally into `%LOCALAPPDATA%\Programs\ProCon2Bridge`.
+3. Approve the Windows administrator prompt if the signed third-party USB/IP driver needs installing. Restart Windows if its installer asks you to. Pair with **SYNC** for the first Bluetooth connection.
 
-The root keeps the quick-start commands, project overview and default configuration.
-Implementation lives in `src/`, automated checks in `tests/`, long-form guides and
-credits in `docs/`, and build / driver maintenance tools in `scripts/`.
+The third-party driver is signed; the project EXE is currently unsigned. The release provides a ZIP checksum. See [SECURITY.md](SECURITY.md) for verification, permissions and removal.
 
-## Download and run
+## Daily Usage & Windows Startup
 
-Before running, see [what the scripts do, permissions, checksums and removal](SECURITY.md).
-Project executables are currently unsigned; do not disable antivirus to run them.
+ProCon2Bridge operates silently in the system tray without requiring an open command prompt (CMD) window.
 
-Download **ProCon2Bridge-0.4.0-windows-x64.zip** from [Releases](https://github.com/yngvifreyr1810/ProCon2Bridge/releases).
-Extract the complete ZIP, then double-click **ProCon2Bridge.exe**. Python is not needed.
-The EXE installs the app for your Windows account in
-`%LOCALAPPDATA%/Programs/ProCon2Bridge`, registers startup, and runs in the
-notification area beside the clock. First-time driver setup may ask for Windows
-administrator approval. Restart Windows if the driver installer requests it.
+- **Startup Integration:** The first launch registers ProCon2Bridge in Windows Startup apps. You can enable or disable automatic launch via Task Manager (**Startup apps** tab).
+- **Daily Reconnection:** After Windows starts, turn on Bluetooth and press **A** to reconnect. Startup retries while Bluetooth or the virtual device is still becoming available.
+- **Upgrades:** Run the newer package EXE to update the installed app. Existing configuration files, sensor calibrations, and GL/GR button mappings are preserved.
 
-After setup, press a controller button to reconnect; hold SYNC for initial pairing.
-The bridge keeps running without a CMD window. Right-click its blue controller
-icon for **Settings**, **Calibrate motion**, **Windows Startup settings**, logs,
-or **Exit ProCon2Bridge**. Launching the EXE again opens settings instead of
-starting another bridge. Legacy Start/Settings/Stop scripts remain available.
+## Configuration & Calibration
 
-The installed app has a fixed location, so moving or deleting the downloaded ZIP
-or extracted package does not break startup. Your configuration and logs are in
-the installed app folder. An existing `config.json` beside the downloaded EXE is
-migrated only when no installed configuration exists; upgrades preserve the
-installed calibration and GL/GR mappings.
+Right-click the blue controller icon beside the clock for **Back buttons / Settings**, **Calibrate motion**, **Windows Startup settings**, logs or **Exit ProCon2Bridge**. Opening the EXE again brings up settings. Only the bridge starts with Windows; it does not launch a game.
 
-## Start automatically with Windows
+Assign an existing Switch Pro button, a simultaneous chord such as `ZL + ZR`, or `NONE`, then choose **Save mappings**. These are Switch Pro 1 button aliases, not extra native game buttons; changes apply without reconnecting.
 
-First EXE launch creates **ProCon2Bridge.lnk** in the current user's Windows
-Startup folder, targeting the installed EXE. It appears as **ProCon2Bridge** in
-**Task Manager > Startup apps** and **Settings > Apps > Startup**.
-Disable it there whenever you prefer manual launch. The app does not overwrite
-Windows' enabled/disabled choice. No scheduled task or bridge service is used.
-Startup waits and retries when Bluetooth or the virtual controller is not ready
-immediately after sign-in. Exit from the tray stops the bridge for this session.
+For motion calibration, place the controller still and choose **Calibrate motion** from the tray. Advanced settings remain in the installed `config.json`.
 
-## Map the GL / GR back buttons
+## Compatibility & Haptic Limitations
 
-Double-click **ProCon2Bridge-Settings.cmd** (or run `ProCon2Bridge.exe --settings`). Choose an
-action for **GL (left)** and **GR (right)**, then **Save mappings**. You can select
-one existing Switch Pro button from the list or type a simultaneous chord such
-as `ZL + ZR` (up to four buttons). `NONE` disables that back button.
+### Verified Applications
+Input handling, motion controls, and rumble have been verified in games including [PowerfulMoon](https://github.com/yngvifreyr1810/PowerfulMoon) (Super Mario Odyssey Recomp), TOTK Recomp, and select Nintendo Switch emulators. The emulator names and versions were not recorded for those reports; compatibility depends on each game’s input settings.
 
-Changes apply to the running bridge within one second, without reconnecting.
-The window also shows held back buttons and virtual output; hold a button for
-one second to see it in the status display. Physical face buttons keep working
-when their target is also assigned to GL/GR. Mapping is held/released with the
-physical back button; there is no turbo, timed macro or keyboard injection.
+### Vibration & Haptics
+The virtual Switch Pro 1 path carries standard vibration and motion. The direct detailed haptics path is experimental. Console-identical HD Rumble / HD Rumble 2 feedback and exact physical amplitude reproduction are not claimed. Detailed vibration parameter routing and physical calibration boundaries are documented in [docs/HD-RUMBLE.md](docs/HD-RUMBLE.md).
 
-Example: GL = `B`, GR = `A`. Button names follow **Nintendo** labeling. These are
-aliases/chords of Switch Pro 1 buttons, not two additional native game buttons.
-Existing configuration and gyro calibration survive updates. Manual mappings can
-still use legacy strings or lists, e.g. `"GL": ["ZL", "ZR"]`.
-
-## Supported paths and limits
-
-| Use | Input and motion | Vibration |
-| --- | --- | --- |
-| Native SDL games / Steam with Switch Pro input | Virtual Switch Pro HID, gyro and accelerometer | Classic Switch rumble translated to Pro 2 BLE |
-| Switch emulators (owner-confirmed; versions not recorded) | Virtual Switch Pro 1 input and motion; optional DSU at 127.0.0.1:26760 where supported | Owner confirmed working output through Switch Pro 1; emulator-specific settings still apply |
-| [PowerMoon-Switch2Pro](https://github.com/yngvifreyr1810/PowerMoon-Switch2Pro) | Native motion adapter in that fork | Direct per-side, per-band frequency/amplitude transport; experimental physical calibration |
-
-This is a **user-mode bridge using a third-party signed virtual USB driver**,
-not a new signed Nintendo kernel driver. Windows 11 x64 was tested; other Windows
-versions, Bluetooth adapters and third-party controllers remain unverified.
-USB cable transport, NFC, audio/headphone support and native GameChat are not implemented.
-GL/GR can be configured in the settings window; C and other advanced mappings
-remain in `config.json`. Pairing back to a console may require SYNC again.
-
-**HD Rumble 2 fidelity is not guaranteed.** The direct path retains the game's
-individual effect parameters; the frequency-to-physical-carrier profile is
-experimental. See [HD-RUMBLE.md](docs/HD-RUMBLE.md), [verification](docs/VERIFICATION.md),
-and [credits/licenses](docs/THIRD_PARTY.md). Do not equate standard SDL rumble with
-lossless HD Rumble or advertise console-identical output.
-
-## Windows 11 Bluetooth improvements
-
-Version 0.3.2 adds fresh GATT discovery fallback after a stale reconnect cache,
-checks all required characteristics before initialization, explicitly releases
-the Windows throughput-preference request, bounds BLE haptic writes and keeps
-input-loss recovery independent of rumble. The virtual controller remains present
-while the physical controller reconnects; held controls are released on loss.
-No Bluetooth adapter power settings, registry tweaks or priority hacks are applied.
-
-See [the Switch2Connect comparison](docs/UPSTREAM-REVIEW.md) for inherited code,
-new adaptations and features deliberately outside this focused bridge's scope.
+Windows 11 x64 and the official controller are the tested target. USB cable transport, NFC, controller audio and native GameChat are not implemented. Pairing back to a console may require SYNC.
 
 ## Build and contribute
 
-On Windows x64 with Python 3.14: `python -m venv .venv`, activate it,
-`python -m pip install -r requirements.txt`, then run these PowerShell commands:
+On Windows x64 with Python 3.14, create and activate a virtual environment, install `requirements.txt`, and run:
 
 ```powershell
 $env:PYTHONPATH = 'src'
 python -m unittest discover -s tests -t . -v
 powershell -ExecutionPolicy Bypass -File scripts/ProCon2Bridge-Build.ps1
 ```
-Obtain the unchanged driver installer linked in docs/THIRD_PARTY.md for a source build;
-the binary release bundles it. scripts/ProCon2Bridge-Build.ps1 does not install drivers.
 
-All bridge source is included in binary downloads. Runtime logs, physical device
-addresses and calibration are intentionally excluded from Git and release files.
-No game, keys, firmware, Nintendo SDK or game assets are distributed.
+A source build needs the unchanged driver installer linked in [third-party credits](docs/THIRD_PARTY.md). The build script does not install drivers. Runtime logs, device addresses and calibration are excluded from Git and release files.
 
-Maintained by **Vĩnh An Project / yngvifreyr1810**, with implementation assistance
-from OpenAI Codex. Built on the credited community protocol research below.
+## Source and credits
+
+ProCon2Bridge is licensed under the **GNU General Public License v3.0 or later (GPL-3.0-or-later)**.
+
+The ZIP includes bridge source and dependency licenses. It contains no game files, keys, firmware, Nintendo SDK or game assets.
+
+- **Third-party credits and licenses:** [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md)
+- **Switch2Connect comparison:** [docs/UPSTREAM-REVIEW.md](docs/UPSTREAM-REVIEW.md)
+- **Security & Integrity Policy:** [SECURITY.md](SECURITY.md)
+- **Haptic technical details:** [docs/HD-RUMBLE.md](docs/HD-RUMBLE.md)
+
+Maintained by Vĩnh An Project / yngvifreyr1810, with implementation assistance from OpenAI Codex.

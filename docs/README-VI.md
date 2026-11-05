@@ -15,8 +15,8 @@ sau khi cài. Khi nâng cấp, config.json đang dùng được giữ lại. Đ�
 xóa shortcut ProCon2Bridge trong shell:startup và xóa thư mục cài trên.
 Driver USB/IP gỡ riêng trong Windows Installed apps nếu không ứng dụng nào cần.
 
-Người dùng đã xác nhận rung/motion trong TOTK Recomp, SMO Recomp và giả lập qua giao
-thức Switch Pro 1; chưa có danh sách đầy đủ tên/phiên bản giả lập. Không khẳng định
+Đã thử rung/motion trong TOTK Recomp, SMO Recomp và giả lập qua giao thức
+Switch Pro 1; chưa có danh sách đầy đủ tên/phiên bản giả lập. Không khẳng định
 mọi game đều tương thích hoặc HD Rumble giống tuyệt đối console.
 
 Xem [README](../README.md), [HD-RUMBLE](HD-RUMBLE.md), [THIRD_PARTY](THIRD_PARTY.md)

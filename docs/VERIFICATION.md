@@ -24,7 +24,7 @@ stale/missing GATT characteristics, cancellation, cleanup, blocked writes and th
 independent input-loss watchdog. GUI layout/save was tested with a temporary config.
 Cached-discovery failure scenarios were simulated, not reproduced on every adapter.
 
-With PowerMoon-Switch2Pro, game logs recorded motion reads and live vibration
+With PowerfulMoon, game logs recorded motion reads and live vibration
 requests. The user confirmed Odyssey gameplay motion, correctly timed rumble,
 a sustained 2-second test and a modest subjective improvement with direct haptics.
 No measured or blind comparison to console HD Rumble 2 was performed. Frequency
